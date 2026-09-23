@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Pi Academy Setup</title>
+    <style>
+      :root {
+        --orange: #d17914;
+        --dark: #1f1408;
+        --cream: #fff8ed;
+        --ink: #25170a;
+      }
+
+      body {
+        margin: 0;
+        font-family: Poppins, Montserrat, Arial, sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+      }
+
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
+
+      .mast {
+        background: var(--dark);
+        color: var(--cream);
+        border-top: 10px solid var(--orange);
+        padding: 32px;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 6vw, 4.5rem);
+        line-height: 1;
+        margin: 0 0 16px;
+        letter-spacing: 0;
+      }
+
+      p {
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      code, pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      pre {
+        overflow-x: auto;
+        background: #111;
+        color: #f8f1e8;
+        padding: 18px;
+        border-left: 6px solid var(--orange);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .item {
+        border: 1px solid #e6c08a;
+        padding: 16px;
+        background: white;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="mast">
+        <h1>The Pi Academy Setup</h1>
+        <p>Download the coding camp projects, install useful editors, and prepare standard dependencies from one terminal interface.</p>
+      </section>
+
+      <h2>Install</h2>
+      <p>Run this on Raspberry Pi OS 64-bit for Raspberry Pi 4 or newer:</p>
+      <pre><code>curl -fsSL https://the-pi-academy.github.io/tpa_tui/install.sh | bash</code></pre>
+
+      <div class="grid">
+        <div class="item">
+          <strong>Repositories</strong>
+          <p>Projects are cloned into <code>~/thepiacademy</code>. The setup tool itself lives in <code>~/thepiacademy/tpa_tui</code>.</p>
+        </div>
+        <div class="item">
+          <strong>Editors</strong>
+          <p>Installs VS Code where available, plus Thonny, Geany, Mousepad, and Nano for simpler editing paths.</p>
+        </div>
+        <div class="item">
+          <strong>Dependencies</strong>
+          <p>Uses apt, Python virtual environments, Maven, and project-specific setup commands based on each standard repository.</p>
+        </div>
+        <div class="item">
+          <strong>Optional ML</strong>
+          <p>The object detection demo is left out by default. Add it later from the TUI or with <code>--include-optional --include-heavy</code>.</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
