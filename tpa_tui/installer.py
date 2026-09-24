@@ -231,9 +231,74 @@ def print_plan(
             log(f"  - {repo.name}: {', '.join(repo.requirements)}")
 
 
+def run_line_menu(
+    dry_run: bool = False,
+    workspace: Path = default_workspace(),
+    include_heavy: bool = False,
+    editors: bool = True,
+    include_optional: bool = False,
+) -> int:
+    runner = Runner(dry_run=dry_run)
+    while True:
+        print()
+        print("The Pi Academy Setup")
+        print(f"Workspace: {workspace}")
+        print("1. Install / update everything")
+        print("2. Download or update repositories")
+        print("3. Install editors")
+        print("4. Install dependencies")
+        print("5. Install optional + heavy projects")
+        print("6. Show install plan")
+        print("q. Quit")
+        choice = input("Choose an option: ").strip().lower()
+
+        if choice in {"q", "quit", "exit"}:
+            return 0
+        if choice == "1":
+            install_everything(
+                dry_run=dry_run,
+                workspace=workspace,
+                include_heavy=include_heavy,
+                editors=editors,
+                include_optional=include_optional,
+            )
+            return 0
+        if choice == "2":
+            clone_or_update_repositories(runner, workspace, include_optional=include_optional)
+            return 0
+        if choice == "3":
+            maybe_install_vscode_repo(runner)
+            install_apt_packages(runner, EDITOR_APT_PACKAGES)
+            return 0
+        if choice == "4":
+            install_dependencies(
+                runner,
+                workspace,
+                include_heavy=include_heavy,
+                editors=False,
+                include_optional=include_optional,
+            )
+            return 0
+        if choice == "5":
+            clone_or_update_repositories(runner, workspace, include_optional=True)
+            install_dependencies(
+                runner,
+                workspace,
+                include_heavy=True,
+                editors=False,
+                include_optional=True,
+            )
+            return 0
+        if choice == "6":
+            print_plan(include_heavy=include_heavy, editors=editors, include_optional=include_optional)
+            continue
+
+        print(f"Unknown option: {choice}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Install The Pi Academy coding projects.")
-    parser.add_argument("action", choices=("all", "repos", "deps", "plan"), nargs="?", default="all")
+    parser.add_argument("action", choices=("all", "repos", "deps", "plan", "menu"), nargs="?", default="all")
     parser.add_argument("--workspace", type=Path, default=default_workspace())
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--include-heavy", action="store_true", help="Install large ML/Rust dependency sets.")
@@ -245,6 +310,14 @@ def main(argv: list[str] | None = None) -> int:
     runner = Runner(dry_run=args.dry_run)
     include_heavy = args.include_heavy and not args.skip_heavy
     editors = not args.skip_editors
+    if args.action == "menu":
+        return run_line_menu(
+            dry_run=args.dry_run,
+            workspace=args.workspace,
+            include_heavy=include_heavy,
+            editors=editors,
+            include_optional=args.include_optional,
+        )
     if args.action == "plan":
         print_plan(include_heavy=include_heavy, editors=editors, include_optional=args.include_optional)
     elif args.action == "repos":

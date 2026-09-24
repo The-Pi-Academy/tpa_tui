@@ -32,6 +32,21 @@ tpa-setup plan
 tpa-setup all --dry-run
 ```
 
+If a remote terminal renders the TUI but does not pass key presses through,
+use the plain line-mode menu:
+
+```bash
+tpa-setup menu
+```
+
+The bootstrap script also launches the line-mode menu automatically when it
+detects Kubernetes. To force it anywhere:
+
+```bash
+curl -fsSLo /tmp/tpa-install.sh https://raw.githubusercontent.com/The-Pi-Academy/tpa_tui/main/scripts/install.sh
+TPA_SETUP_MODE=menu bash /tmp/tpa-install.sh
+```
+
 ## GitHub Pages
 
 The static Pages entry point lives in `docs/`. Configure GitHub Pages for this
