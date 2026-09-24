@@ -4,6 +4,7 @@ from pathlib import Path
 
 from textual import work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, DataTable, Footer, Header, Log, Static
 
@@ -67,11 +68,11 @@ class TpaSetupApp(App[None]):
     """
 
     BINDINGS = [
-        ("q", "quit", "Quit"),
-        ("p", "plan", "Plan"),
-        ("r", "repos", "Repos"),
-        ("d", "dependencies", "Deps"),
-        ("a", "all", "All"),
+        Binding("q", "quit", "Quit", priority=True),
+        Binding("p", "plan", "Plan", priority=True),
+        Binding("r", "repos", "Repos", priority=True),
+        Binding("d", "dependencies", "Deps", priority=True),
+        Binding("a", "all", "All", priority=True),
     ]
 
     def __init__(self, workspace: Path | None = None) -> None:
@@ -136,16 +137,28 @@ class TpaSetupApp(App[None]):
     def action_plan(self) -> None:
         print_plan(log=self.log_line)
 
-    @work(thread=True)
     def action_repos(self) -> None:
+        self.log_line("Starting repository download/update...")
+        self.install_repos()
+
+    @work(thread=True)
+    def install_repos(self) -> None:
         clone_or_update_repositories(self.runner(), self.workspace)
 
-    @work(thread=True)
     def action_dependencies(self) -> None:
-        install_dependencies(self.runner(), self.workspace, include_heavy=False, editors=False)
+        self.log_line("Starting standard dependency install...")
+        self.install_standard_dependencies()
 
     @work(thread=True)
+    def install_standard_dependencies(self) -> None:
+        install_dependencies(self.runner(), self.workspace, include_heavy=False, editors=False)
+
     def action_optional(self) -> None:
+        self.log_line("Starting optional/heavy project install...")
+        self.install_optional_projects()
+
+    @work(thread=True)
+    def install_optional_projects(self) -> None:
         clone_or_update_repositories(self.runner(), self.workspace, include_optional=True)
         install_dependencies(
             self.runner(),
@@ -155,12 +168,20 @@ class TpaSetupApp(App[None]):
             include_optional=True,
         )
 
-    @work(thread=True)
     def install_editors(self) -> None:
-        install_apt_packages(self.runner(), EDITOR_APT_PACKAGES)
+        self.log_line("Starting editor install...")
+        self.install_editor_packages()
 
     @work(thread=True)
+    def install_editor_packages(self) -> None:
+        install_apt_packages(self.runner(), EDITOR_APT_PACKAGES)
+
     def action_all(self) -> None:
+        self.log_line("Starting full install/update...")
+        self.install_all_projects()
+
+    @work(thread=True)
+    def install_all_projects(self) -> None:
         install_everything(
             workspace=self.workspace,
             log=lambda line: self.call_from_thread(self.log_line, line),
