@@ -12,6 +12,15 @@ default student-machine download.
 
 ## Quick Start
 
+Install `curl` first if the image does not already include it:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y curl
+```
+
+Then launch the setup tool:
+
 ```bash
 curl -fsSL https://the-pi-academy.github.io/tpa_tui/install.sh | bash
 ```
