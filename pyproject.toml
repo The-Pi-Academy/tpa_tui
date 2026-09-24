@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tpa-tui"
+version = "0.1.0"
+description = "The Pi Academy setup TUI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "textual>=0.83.0",
+]
+
+[project.scripts]
+tpa-tui = "tpa_tui.app:main"
+tpa-setup = "tpa_tui.installer:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tpa_tui"]
