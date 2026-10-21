@@ -71,3 +71,31 @@ repository to publish from the `main` branch and the `/docs` folder.
   `--include-optional`; combine both flags for the full object-detection setup.
 - Hardware-specific projects still require the matching Raspberry Pi hardware
   such as GPIO wiring or Sense HAT.
+
+## Troubleshooting an installation failure
+
+The TUI keeps the menu open when an install worker fails, shows the failed
+command/error, and does not report completion for that operation. Read the
+command output immediately above the error before retrying. Earlier successful
+steps are not rolled back.
+
+To capture a plain-text log on a Raspberry Pi, run this in Bash (this retries
+the installation, including package installation and repository updates):
+
+```bash
+set -o pipefail
+~/thepiacademy/tpa_tui/.venv/bin/tpa-setup all 2>&1 | tee ~/thepiacademy-install.log
+```
+
+Include the failing command and preceding error output when reporting a problem,
+along with `cat /etc/os-release`, `uname -m`, and `python3 --version`. Review the
+log for personal information before sharing it.
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Tests use Textual's headless test runner and mocked installer operations; they
+do not install system packages or require Raspberry Pi hardware.
