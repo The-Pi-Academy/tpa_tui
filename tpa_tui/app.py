@@ -6,6 +6,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
+from textual.worker import Worker, WorkerState
 from textual.widgets import Button, DataTable, Footer, Header, Log, Static
 
 from .catalog import EDITOR_APT_PACKAGES, OPTIONAL_REPOSITORIES, REPOSITORIES
@@ -114,6 +115,17 @@ class TpaSetupApp(App[None]):
     def log_line(self, line: str) -> None:
         self.query_one("#log", Log).write_line(line)
 
+    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        if event.state == WorkerState.ERROR:
+            error = event.worker.error
+            self.log_line(f"Install failed ({event.worker.name}): {type(error).__name__}: {error}")
+            self.log_line(
+                "Setup stopped before completion. Review the command output above, "
+                "resolve the error, then retry. The setup menu is still available."
+            )
+        elif event.state == WorkerState.SUCCESS:
+            self.log_line(f"Completed: {event.worker.name}")
+
     def runner(self) -> Runner:
         return Runner(log=lambda line: self.call_from_thread(self.log_line, line))
 
@@ -141,7 +153,7 @@ class TpaSetupApp(App[None]):
         self.log_line("Starting repository download/update...")
         self.install_repos()
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def install_repos(self) -> None:
         clone_or_update_repositories(self.runner(), self.workspace)
 
@@ -149,7 +161,7 @@ class TpaSetupApp(App[None]):
         self.log_line("Starting standard dependency install...")
         self.install_standard_dependencies()
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def install_standard_dependencies(self) -> None:
         install_dependencies(self.runner(), self.workspace, include_heavy=False, editors=False)
 
@@ -157,7 +169,7 @@ class TpaSetupApp(App[None]):
         self.log_line("Starting optional/heavy project install...")
         self.install_optional_projects()
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def install_optional_projects(self) -> None:
         clone_or_update_repositories(self.runner(), self.workspace, include_optional=True)
         install_dependencies(
@@ -172,7 +184,7 @@ class TpaSetupApp(App[None]):
         self.log_line("Starting editor install...")
         self.install_editor_packages()
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def install_editor_packages(self) -> None:
         install_apt_packages(self.runner(), EDITOR_APT_PACKAGES)
 
@@ -180,7 +192,7 @@ class TpaSetupApp(App[None]):
         self.log_line("Starting full install/update...")
         self.install_all_projects()
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     def install_all_projects(self) -> None:
         install_everything(
             workspace=self.workspace,
